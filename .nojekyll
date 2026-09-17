@@ -1,0 +1,5 @@
+# 让 GitHub Pages 跳过 Jekyll 处理：
+# 1) 纯静态站点不需要 Jekyll，跳过可以更快、更少意外；
+# 2) 以后若加入以 _ 开头的文件/目录（Jekyll 默认会忽略它们），也不会被吞掉。
+# 说明：用「GitHub Actions」方式发布时不需要这个文件（Actions 产物不经过 Jekyll），
+# 但用「Deploy from a branch」方式发布时必须提交它。

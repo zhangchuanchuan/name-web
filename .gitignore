@@ -1,0 +1,10 @@
+# 依赖与构建缓存（字库数据已提交，这些都能重新生成/下载）
+tools/node_modules/
+tools/.cache/
+
+# 系统 / 编辑器
+.DS_Store
+Thumbs.db
+*.log
+.idea/
+.vscode/

@@ -1,0 +1,12 @@
+{
+  "name": "name-web-tools",
+  "private": true,
+  "type": "module",
+  "description": "起名网站的数据构建脚本（仅在需要重新生成字库时运行）",
+  "scripts": { "build": "node build-data.mjs" },
+  "dependencies": {
+    "cnchar": "^3.2.6",
+    "cnchar-info": "^3.2.6",
+    "cnchar-radical": "^3.2.6"
+  }
+}

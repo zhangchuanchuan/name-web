@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>取名工坊 · 汉字取名器</title>
+<meta name="description" content="基于 7486 个规范汉字与 105 万真实人名语料的取名工具：按笔画、声调、部首、结构、五行逐字筛选，自动排列组合并导出。" />
+<link rel="stylesheet" href="assets/style.css" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🀄</text></svg>" />
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="seal">名</span>
+    <div>
+      <h1>取名工坊</h1>
+      <p id="corpus-line" class="sub">正在载入字库…</p>
+    </div>
+  </div>
+  <nav class="tabs">
+    <button class="tab active" data-view="compose">组合取名</button>
+    <button class="tab" data-view="browse">字库浏览</button>
+    <button class="tab" data-view="about">关于数据</button>
+  </nav>
+</header>
+
+<main>
+  <!-- ============ 组合取名 ============ -->
+  <section id="view-compose" class="view active">
+    <aside class="panel" id="conditions">
+      <div class="panel-inner">
+
+        <div class="block">
+          <h2><span class="step">0</span>快速开始</h2>
+          <p class="hint">挑一个偏好，条件会自动配好并立即生成；之后可以继续微调。</p>
+          <div class="chips" id="presets"></div>
+        </div>
+
+        <div class="block">
+          <h2><span class="step">1</span>选择姓氏</h2>
+          <div class="surname-row">
+            <input id="surname-input" class="surname-input" value="张" maxlength="2" aria-label="姓氏" />
+            <button id="surname-picker-btn" class="btn ghost" type="button">从 1074 个姓氏中选 ▾</button>
+          </div>
+          <div id="surname-picker" class="picker hidden">
+            <input id="surname-search" class="input" placeholder="搜索姓氏或拼音，如 ou / 欧阳" />
+            <div class="picker-tabs">
+              <button class="mini-tab active" data-stype="1">单姓</button>
+              <button class="mini-tab" data-stype="2">复姓</button>
+              <button class="mini-tab" data-stype="hot">人口前 100</button>
+            </div>
+            <div id="surname-list" class="chip-cloud small"></div>
+          </div>
+          <p class="hint" id="surname-meta"></p>
+        </div>
+
+        <div class="block">
+          <h2><span class="step">2</span>名字字数</h2>
+          <div class="seg" id="len-seg">
+            <button data-len="1">单字名（1 字）</button>
+            <button data-len="2" class="active">双字名（2 字）</button>
+          </div>
+        </div>
+
+        <div class="block">
+          <h2><span class="step">3</span>逐字条件</h2>
+          <p class="hint">每个字的笔画、声调、结构、部首、五行等条件可分别设置。</p>
+          <div id="position-filters"></div>
+        </div>
+
+        <div class="block">
+          <h2><span class="step">4</span>整名规则</h2>
+          <div class="rules" id="combo-rules"></div>
+        </div>
+
+        <div class="block sticky-actions">
+          <button id="generate" class="btn primary big">生成名字</button>
+          <button id="reset" class="btn ghost" type="button">重置条件</button>
+          <p class="hint" id="generate-hint"></p>
+        </div>
+      </div>
+    </aside>
+
+    <div class="results">
+      <div class="pool" id="pool-panel">
+        <div class="pool-head">
+          <h2>满足条件的字</h2>
+          <div class="pool-actions">
+            <button id="export-pool" class="btn tiny ghost">导出候选字</button>
+          </div>
+        </div>
+        <div id="pool-body" class="pool-body"></div>
+      </div>
+
+      <div class="result-head">
+        <h2>组合结果 <span id="result-count" class="count">0</span></h2>
+        <div class="result-tools">
+          <label class="inline">排序
+            <select id="sort-select">
+              <option value="recommend" selected>推荐（避开爆款，也不生僻）</option>
+              <option value="hot-asc">冷门优先（最稀有）</option>
+              <option value="hot-desc">热门优先</option>
+              <option value="strokes-asc">总笔画少 → 多</option>
+              <option value="strokes-desc">总笔画多 → 少</option>
+              <option value="pinyin">拼音字母序</option>
+              <option value="wuge">五格得分高 → 低</option>
+            </select>
+          </label>
+          <label class="inline">每页
+            <select id="page-size">
+              <option>24</option><option selected>48</option><option>96</option><option>240</option>
+            </select>
+          </label>
+          <span class="spacer"></span>
+          <button id="export-csv" class="btn tiny">导出 CSV</button>
+          <button id="export-txt" class="btn tiny ghost">TXT</button>
+          <button id="export-json" class="btn tiny ghost">JSON</button>
+        </div>
+      </div>
+      <div id="result-notice" class="notice hidden"></div>
+      <div id="results" class="cards"></div>
+      <div id="pager" class="pager"></div>
+    </div>
+  </section>
+
+  <!-- ============ 字库浏览 ============ -->
+  <section id="view-browse" class="view">
+    <div class="browse-bar">
+      <input id="browse-search" class="input" placeholder="搜索汉字 / 拼音 / 释义关键词" />
+      <select id="browse-level">
+        <option value="12" selected>一级 + 二级（常用 6442 字）</option>
+        <option value="1">仅一级（3500 字）</option>
+        <option value="123">全部（7486 字）</option>
+      </select>
+      <span id="browse-count" class="count"></span>
+      <button id="browse-export" class="btn tiny ghost">导出当前结果</button>
+    </div>
+    <div class="table-wrap">
+      <table class="chars-table">
+        <thead><tr>
+          <th>字</th><th>拼音</th><th>声调</th><th>笔画</th><th>康熙</th><th>部首</th>
+          <th>结构</th><th>五行</th><th>级别</th><th>人名热度</th><th>性别倾向</th><th>释义</th>
+        </tr></thead>
+        <tbody id="browse-body"></tbody>
+      </table>
+    </div>
+    <div id="browse-pager" class="pager"></div>
+  </section>
+
+  <!-- ============ 关于 ============ -->
+  <section id="view-about" class="view">
+    <div class="prose" id="about-body"></div>
+  </section>
+</main>
+
+<button id="jump-results" class="jump hidden" type="button">↓ 查看结果</button>
+<div id="toast" class="toast hidden"></div>
+
+<script type="module" src="assets/app.js"></script>
+</body>
+</html>

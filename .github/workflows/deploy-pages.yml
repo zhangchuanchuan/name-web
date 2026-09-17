@@ -1,0 +1,63 @@
+# 用 GitHub Actions 把纯静态站点发布到 GitHub Pages
+#
+# 首次使用：
+#   仓库 Settings → Pages → Build and deployment → Source 选「GitHub Actions」，
+#   然后 push 到 main 分支（或在 Actions 页面手动 Run workflow）。
+#
+# 说明：
+#   · 本站没有构建步骤，这个工作流只做「挑出要发布的文件 → 上传 → 部署」三件事；
+#   · 只发布 index.html / assets / data / .nojekyll，tools/ 与 README 不会进入站点；
+#   · Pages 站点有 1 GB 上限、软带宽 100 GB/月；用自定义 Actions 工作流发布时
+#     不受「每小时 10 次构建」的软限制约束（见 GitHub Pages limits 文档）。
+
+name: Deploy static site to Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v6
+
+      - name: 组装站点目录（只发布站点需要的文件）
+        run: |
+          mkdir -p _site
+          cp index.html _site/
+          cp -r assets _site/assets
+          cp -r data _site/data
+          cp .nojekyll _site/.nojekyll
+          echo "发布内容："
+          find _site -type f | sort
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
