@@ -1,5 +1,7 @@
 # 取名工坊 · 汉字取名器
 
+> 线上地址：**https://zhangchuanchuan.github.io/name-web/** 　（源码：https://github.com/zhangchuanchuan/name-web）
+
 一个纯静态的起名网站：**先按条件把可用的汉字挑出来，再自动排列组合成名字，最后导出**。
 没有后端、没有构建步骤、没有第三方运行时依赖——`data/` 里是离线生成好的字库 JSON，前端是原生 ES Module。
 
@@ -200,6 +202,16 @@ git add -A && git commit -m "update" && git push
 
 用 Actions 方式会自动重新部署；用分支方式 GitHub 也会自动重新发布。
 如果重新生成了字库（`npm run build:data`），`data/` 下的三个 JSON 会变化，一起提交即可。
+
+### 已部署记录（本仓库）
+
+- 站点：https://zhangchuanchuan.github.io/name-web/ ，由 `.github/workflows/deploy-pages.yml` 发布
+- Pages 发布方式：**GitHub Actions**（`build_type: workflow`），只发布站点文件
+- 排查记录：账号下曾有自定义域名 `www.zhangchuanchuan.com`（配在 `zhangchuanchuan.github.io` 仓库的 `CNAME` 里），
+  该域名当时已无任何 DNS 记录，导致 GitHub 把**所有** `*.github.io` 站点 301 到这个死域名。已删除该 `CNAME`
+  文件并清空 Pages 的自定义域名设置，博客与本站恢复直连。
+  **若以后域名恢复解析**，在任意一个 Pages 站点里重新填写自定义域名即可（`www` CNAME → `zhangchuanchuan.github.io`；
+  apex `A` → `185.199.108.153 / .109 / .110 / .111`），并建议勾选 Enforce HTTPS。
 
 ### 自定义域名（可选）
 
