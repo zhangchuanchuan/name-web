@@ -136,6 +136,76 @@ npm run test:e2e  # 端到端：起服务器 + 无头 Chrome 真实点击页面�
 
 当前：逻辑自测 **49 项全部通过**，端到端 **33 项全部通过**。
 
+## 部署到 GitHub Pages
+
+本站是纯静态站点（无后端、无构建步骤），而且**全部用相对路径**，所以既能放在
+`https://<用户名>.github.io/`，也能放在子路径 `https://<用户名>.github.io/<仓库名>/`。
+仓库里已经准备好 `.gitignore`、`.nojekyll` 和 Actions 工作流，按下面任选一种即可。
+
+### 第 0 步：推到 GitHub
+
+先在 GitHub 上新建一个**空仓库**（不要勾选 Add README / .gitignore，避免首次推送冲突），然后：
+
+```bash
+cd name-web
+git remote add origin https://github.com/<用户名>/<仓库名>.git   # 或 git@github.com:<用户名>/<仓库名>.git
+git push -u origin main
+```
+
+> 仓库里已经有一次提交。`.gitignore` 已排除 `tools/node_modules/` 与 `tools/.cache/`（约 42 MB 的
+> 第三方原始数据，可用 `npm run build:data` 重新下载），因此实际推送的只有约 1.6 MB。
+
+### 方式 A：从分支发布（最简单，零配置）
+
+1. 仓库 **Settings → Pages**
+2. **Build and deployment → Source** 选 `Deploy from a branch`
+3. **Branch** 选 `main`，目录选 `/ (root)`，Save
+4. 等 1 分钟左右，访问 **`https://<用户名>.github.io/<仓库名>/`**
+
+仓库根的 `.nojekyll` 会让 GitHub 跳过 Jekyll 处理，直接原样发布这些静态文件。
+
+### 方式 B：用 GitHub Actions 发布（推荐，可控）
+
+仓库已内置 `.github/workflows/deploy-pages.yml`，它只做三件事：挑出站点文件 → 上传 → 部署，
+并且**只发布** `index.html`、`assets/`、`data/`、`.nojekyll`，`tools/` 与 README 不会进入站点。
+
+1. 仓库 **Settings → Pages → Build and deployment → Source** 选 `GitHub Actions`
+2. push 到 `main`（或在 **Actions** 页手动 `Run workflow`）
+3. 部署完成后，Actions 里会直接给出站点 URL
+
+### 两种方式怎么选
+
+| | 方式 A 分支发布 | 方式 B Actions |
+|---|---|---|
+| 配置 | 点两下即可 | 需把 Source 改成 GitHub Actions |
+| 发布内容 | 整个仓库（含 tools/、README） | 只有站点文件 |
+| 构建频率限制 | 受「每小时 10 次构建」软限制 | 自定义工作流**不受**该限制 |
+| 适合 | 就是现在这个纯静态站点 | 以后要加构建步骤、或只想发布部分文件 |
+
+### Pages 的额度与限制（[官方文档](https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits)）
+
+- 源仓库建议 ≤ 1 GB，**发布后的站点 ≤ 1 GB**（本站连数据一共约 1.6 MB）；
+- 单次部署超过 **10 分钟**会超时（本站无需构建，秒级完成）；
+- 软带宽上限 **100 GB/月**，软构建上限 **10 次/小时**（用自定义 Actions 工作流发布时不受构建次数限制）；
+- 免费账号的 Pages 只支持**公开仓库**；私有仓库里的 Pages 需要 GitHub Pro / Team / Enterprise；
+- GitHub Pages 不允许用于以商业交易为主的站点（做个人作品/工具没问题）。
+
+### 后续更新
+
+改了代码或字库后：
+
+```bash
+git add -A && git commit -m "update" && git push
+```
+
+用 Actions 方式会自动重新部署；用分支方式 GitHub 也会自动重新发布。
+如果重新生成了字库（`npm run build:data`），`data/` 下的三个 JSON 会变化，一起提交即可。
+
+### 自定义域名（可选）
+
+仓库 **Settings → Pages → Custom domain** 填入域名，GitHub 会在分支里写入 `CNAME` 文件（用 Actions 方式时需要在
+`_site` 里一并生成 `CNAME`，或改用分支发布）。DNS 侧按官方提示配置 A / CNAME 记录即可。
+
 ## 许可
 
 代码 MIT。字库数据的版权与许可遵循上述各数据源。
